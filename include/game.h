@@ -118,7 +118,7 @@ atk_i get_default_atk()
 }
 
 // Function to initialize character stats
-c_stats init_cstat(c_stats character)
+c_stats init_character_stats(c_stats character)
 {
     character.name = "";
     character.hp = MAX_HP;
