@@ -2,33 +2,52 @@
 #include "raylib.h"
 #include "raymath.h"
 
+// Max values
 #define MAX_SPELLS 5
 #define MAX_PHYSICAL_ATKS 5
-#define MAX_ATACKS 10
+#define MAX_ATTACKS 10
 #define MAX_PARTY_SIZE 3
-
 #define MAX_HP 100
 #define MAX_MP 100
 #define MAX_SP 99
 #define MAX_EXP 999
 #define MAX_ITEMS 99
 
+// Default attack constants
 #define DEFAULT_ATTACK_TYPE 0
-#define DEAULT_ATTACK_NAME "ATTACK 0"
-#define DEAULT_ATTACK_ATTACK_TYPE PHYSICAL // 1
-#define DEAULT_ATTACK_PHYSICAL_EFFECT NULL_PE // 0
-// or should everything have one 
-#define DEAULT_ATTACK_ELEMENT NULL_E // 0
-#define DEAULT_ATTACK_ID 0
-#define DEAULT_ATTACK_MP_COST 0
-#define DEAULT_ATTACK_SP_COST 0 
-#define DEAULT_ATTACK_STRENGTH 0
-#define DEAULT_ATTACK  (atk_i) {}
+#define DEFAULT_ATTACK_NAME "ATTACK 0"
+#define DEFAULT_ATTACK_ATTACK_TYPE PHYSICAL
+#define DEFAULT_ATTACK_PHYSICAL_EFFECT NULL_PE
+#define DEFAULT_ATTACK_ELEMENT NULL_E
+#define DEFAULT_ATTACK_ID 0
+#define DEFAULT_ATTACK_MP_COST 0
+#define DEFAULT_ATTACK_SP_COST 0
+#define DEFAULT_ATTACK_STRENGTH 0
 
-#define DEFAULT_SPELL (atk_i){}
+// Default attack macros (defined after structs)
+#define DEFAULT_ATTACK (atk_i){ \
+    .name = DEFAULT_ATTACK_NAME, \
+    .attack_type = DEFAULT_ATTACK_ATTACK_TYPE, \
+    .p_type = DEFAULT_ATTACK_PHYSICAL_EFFECT, \
+    .spell_type = DEFAULT_ATTACK_ELEMENT, \
+    .id = DEFAULT_ATTACK_ID, \
+    .mp_cost = DEFAULT_ATTACK_MP_COST, \
+    .sp_cost = DEFAULT_ATTACK_SP_COST, \
+    .atk_strength = DEFAULT_ATTACK_STRENGTH \
+}
 
+#define DEFAULT_SPELL (atk_i){ \
+    .name = "SPELL 0", \
+    .attack_type = MAGIC, \
+    .p_type = NULL_PE, \
+    .spell_type = NULL_E, \
+    .id = 0, \
+    .mp_cost = 0, \
+    .sp_cost = 0, \
+    .atk_strength = 0 \
+}
 
-
+// Enums
 typedef enum attack_type
 {
     NONE_ATTACK,
@@ -55,6 +74,7 @@ typedef enum elemental_type
     DARK
 } element_t;
 
+// Structs
 typedef struct attack_info
 {
     char* name;
@@ -65,13 +85,13 @@ typedef struct attack_info
     int mp_cost;
     int sp_cost;
     int atk_strength;
- } atk_i;
+} atk_i;
 
- typedef struct item
- {
+typedef struct item
+{
     char* name;
     int id;
- } item;
+} item;
 
 typedef struct character_stats
 {
@@ -81,39 +101,46 @@ typedef struct character_stats
     int sp;
     float exp;
     Vector2 pos;
-    atk_i physcial_attacks[MAX_PHYSICAL_ATKS]; // or atk_i* 
-    atk_i magic_attacks[MAX_SPELLS]; // or atk_i*
+    atk_i physical_attacks[MAX_PHYSICAL_ATKS];
+    atk_i magic_attacks[MAX_SPELLS];
     item inventory[MAX_ITEMS];
 } c_stats;
 
-// 3 vs 3
-c_stats player_party[MAX_PARTY_SIZE];
-c_stats enemey_party[MAX_PARTY_SIZE];
 
+// Global party arrays
+c_stats player_party[MAX_PARTY_SIZE];
+c_stats enemy_party[MAX_PARTY_SIZE];
+
+// Function to get default attack
 atk_i get_default_atk()
 {
-    atk_i attack = (atk_i)
-    {
-        .atk_strength = 1,
-        .attack_type = PHYSICAL,
-        .id = 0,
-        .mp_cost = 0,
-        .name = "DEFAULT",
-        .p_type = NULL_PE,
-        .sp_cost = 0,
-        .spell_type = NULL_E
-    };
-    return attack;
+    return DEFAULT_ATTACK;
 }
+
+// Function to initialize character stats
 c_stats init_cstat(c_stats character)
 {
     character.name = "";
     character.hp = MAX_HP;
     character.mp = MAX_MP;
     character.sp = MAX_SP;
-    character.exp = MAX_EXP;
-    character.pos = (Vector2){0};
-    //character.physcial_attacks[MAX_PHYSICAL_ATKS] = (atk_i){.}; // or atk_i* 
-    character.magic_attacks[MAX_SPELLS]; // or atk_i*
-    character.inventory[MAX_ITEMS];
+    character.exp = 0; // Starting exp should be 0, not MAX_EXP
+    character.pos = (Vector2){0, 0};
+    
+    // Initialize all physical attacks to default
+    for(int i = 0; i < MAX_PHYSICAL_ATKS; i++) {
+        character.physical_attacks[i] = DEFAULT_ATTACK;
+    }
+    
+    // Initialize all magic attacks to default spell
+    for(int i = 0; i < MAX_SPELLS; i++) {
+        character.magic_attacks[i] = DEFAULT_SPELL;
+    }
+    
+    // Initialize inventory to empty
+    for(int i = 0; i < MAX_ITEMS; i++) {
+        character.inventory[i] = (item){.name = NULL, .id = 0};
+    }
+    
+    return character;
 }
