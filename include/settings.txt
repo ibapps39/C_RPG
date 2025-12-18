@@ -1,0 +1,2 @@
+[resolution] screen_x = 1000
+[resolution] screen_y = 1000

@@ -2,6 +2,9 @@
 #include "raylib.h"
 #include "raymath.h"
 
+
+int IN_BATTLE_STATE_G = 0;
+
 // Max values
 #define MAX_SPELLS 5
 #define MAX_PHYSICAL_ATKS 5
@@ -14,15 +17,16 @@
 #define MAX_ITEMS 99
 
 // Default attack constants
-#define DEFAULT_ATTACK_TYPE 0
 #define DEFAULT_ATTACK_NAME "ATTACK 0"
 #define DEFAULT_ATTACK_ATTACK_TYPE PHYSICAL
-#define DEFAULT_ATTACK_PHYSICAL_EFFECT NULL_PE
+#define DEFAULT_ATTACK_PHYSICAL_EFFECT NO_PHYSICAL_EFFECT
 #define DEFAULT_ATTACK_ELEMENT NULL_E
+#define DEFAULT_ATTACK_MAGIC_SIDE_EFFECT NO_MAGICAL_SIDE_EFFECT
 #define DEFAULT_ATTACK_ID 0
 #define DEFAULT_ATTACK_MP_COST 0
 #define DEFAULT_ATTACK_SP_COST 0
 #define DEFAULT_ATTACK_STRENGTH 0
+
 
 // Default attack macros (defined after structs)
 #define DEFAULT_ATTACK (atk_i){ \
@@ -30,6 +34,7 @@
     .attack_type = DEFAULT_ATTACK_ATTACK_TYPE, \
     .p_type = DEFAULT_ATTACK_PHYSICAL_EFFECT, \
     .spell_type = DEFAULT_ATTACK_ELEMENT, \
+    .side_effect_m = DEFAULT_ATTACK_MAGIC_SIDE_EFFECT, \
     .id = DEFAULT_ATTACK_ID, \
     .mp_cost = DEFAULT_ATTACK_MP_COST, \
     .sp_cost = DEFAULT_ATTACK_SP_COST, \
@@ -39,8 +44,9 @@
 #define DEFAULT_SPELL (atk_i){ \
     .name = "SPELL 0", \
     .attack_type = MAGIC, \
-    .p_type = NULL_PE, \
+    .p_type = NO_PHYSICAL_EFFECT, \
     .spell_type = NULL_E, \
+    .side_effect_m = NO_MAGICAL_SIDE_EFFECT,\
     .id = 0, \
     .mp_cost = 0, \
     .sp_cost = 0, \
@@ -58,7 +64,7 @@ typedef enum attack_type
 
 typedef enum physical_effect
 {
-    NULL_PE,
+    NO_PHYSICAL_EFFECT,
     CONCUSSION,
     BLEED
 } p_effect_t;
@@ -73,7 +79,15 @@ typedef enum elemental_type
     LIGHT,
     DARK
 } element_t;
-
+typedef enum magic_effect
+{
+    NO_MAGICAL_SIDE_EFFECT,
+    SILENCE,
+    PETRIFY,
+    TERRIFY,
+    BERSERK,
+    BLIND
+} m_effect_t;
 // Structs
 typedef struct attack_info
 {
@@ -81,6 +95,7 @@ typedef struct attack_info
     atk_t attack_type;
     p_effect_t p_type;
     element_t spell_type;
+    m_effect_t side_effect_m;
     int id;
     int mp_cost;
     int sp_cost;
@@ -104,18 +119,14 @@ typedef struct character_stats
     atk_i physical_attacks[MAX_PHYSICAL_ATKS];
     atk_i magic_attacks[MAX_SPELLS];
     item inventory[MAX_ITEMS];
+    p_effect_t current_physical_side_effect;
+    m_effect_t current_magic_side_effect;
 } c_stats;
 
 
 // Global party arrays
 c_stats player_party[MAX_PARTY_SIZE];
 c_stats enemy_party[MAX_PARTY_SIZE];
-
-// Function to get default attack
-atk_i get_default_atk()
-{
-    return DEFAULT_ATTACK;
-}
 
 // Function to initialize character stats
 c_stats init_character_stats(c_stats character)
@@ -141,6 +152,9 @@ c_stats init_character_stats(c_stats character)
     for(int i = 0; i < MAX_ITEMS; i++) {
         character.inventory[i] = (item){.name = NULL, .id = 0};
     }
+
+    character.current_magic_side_effect = NO_MAGICAL_SIDE_EFFECT;
+    character.current_physical_side_effect = NO_PHYSICAL_EFFECT;
     
     return character;
 }
