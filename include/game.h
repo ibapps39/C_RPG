@@ -128,6 +128,16 @@ typedef struct character_stats
 c_stats player_party[MAX_PARTY_SIZE];
 c_stats enemy_party[MAX_PARTY_SIZE];
 
+// BASE STATS
+#define BASE_MAGIC_DAMAGE 10
+#define BASE_NULL_E (int)NAN
+#define BASE_FIRE_DAMAGE BASE_MAGIC_DAMAGE
+#define BASE_WATER_DAMAGE BASE_MAGIC_DAMAGE
+#define BASE_EARTH_DAMAGE BASE_MAGIC_DAMAGE
+#define BASE_WIND_DAMAGE BASE_MAGIC_DAMAGE
+#define BASE_LIGHT_DAMAGE BASE_MAGIC_DAMAGE
+#define BASE_DARK_DAMAGE BASE_MAGIC_DAMAGE
+
 // Function to initialize character stats
 c_stats init_character_stats(c_stats character)
 {
